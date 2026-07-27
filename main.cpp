@@ -3,32 +3,45 @@ using namespace std;
 
 int main()
 {
-      string s;
-      getline(cin, s);
+        int n;
+        cin >> n;
 
-      int a[26] = {0};
-      for (int i = 0; i < s.length(); i++)
-            a[s[i]-'a'] = i;
+        vector<int> nums(n);
+        unordered_map<int,int> cnt;
+        unordered_map<int,int> tail;
 
-      string t;
-      vector<bool> v(26, false);
+        for(int i=0;i<n;i++)
+        {
+                cin>>nums[i];
+                cnt[nums[i]]++;
+        }
 
-      for (int i = 0; i < s.length(); i++)
-      {
-            if (v[s[i]-'a'])
-                  continue;
+        for(int x:nums)
+        {
+                if(cnt[x]==0)
+                        continue;
 
-            while (!t.empty() &&
-                   t.back() > s[i] &&
-                   a[t.back()-'a'] > i)
-            {
-                  v[t.back()-'a'] = false;
-                  t.pop_back();
-            }
+                if(tail[x-1]>0)
+                {
+                        tail[x-1]--;
+                        tail[x]++;
+                        cnt[x]--;
+                }
+                else if(cnt[x+1]>0 && cnt[x+2]>0)
+                {
+                        cnt[x]--;
+                        cnt[x+1]--;
+                        cnt[x+2]--;
+                        tail[x+2]++;
+                }
+                else
+                {
+                        cout<<"false";
+                        return 0;
+                }
+        }
 
-            t.push_back(s[i]);
-            v[s[i]-'a'] = true;
-      }
+        cout<<"true";
 
-      cout << t << endl;
+        return 0;
 }
