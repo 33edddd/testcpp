@@ -1,119 +1,117 @@
-#include <iostream>
-#include <vector>
-#include <string>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-class Solution {
-public:
-    bool validTicTacToe(vector<string>& board) {
 
-        int x = 0, o = 0;
-
-        // 统计X和O数量
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (board[i][j] == 'X')
-                    x++;
-                else if (board[i][j] == 'O')
-                    o++;
-            }
-        }
-
-        // X先手，数量不符合直接错误
-        if (!(x == o || x == o + 1))
-            return false;
-
-
-        bool xWin = false;
-        bool oWin = false;
-
-
-        // 判断三行
-        for (int i = 0; i < 3; i++) {
-            if (board[i][0] == board[i][1] &&
-                board[i][1] == board[i][2]) {
-
-                if (board[i][0] == 'X')
-                    xWin = true;
-                if (board[i][0] == 'O')
-                    oWin = true;
-            }
-        }
-
-
-        // 判断三列
-        for (int j = 0; j < 3; j++) {
-            if (board[0][j] == board[1][j] &&
-                board[1][j] == board[2][j]) {
-
-                if (board[0][j] == 'X')
-                    xWin = true;
-                if (board[0][j] == 'O')
-                    oWin = true;
-            }
-        }
-
-
-        // 判断主对角线
-        if (board[0][0] == board[1][1] &&
-            board[1][1] == board[2][2]) {
-
-            if (board[0][0] == 'X')
-                xWin = true;
-            if (board[0][0] == 'O')
-                oWin = true;
-        }
-
-
-        // 判断副对角线
-        if (board[0][2] == board[1][1] &&
-            board[1][1] == board[2][0]) {
-
-            if (board[0][2] == 'X')
-                xWin = true;
-            if (board[0][2] == 'O')
-                oWin = true;
-        }
-
-
-        // 两人同时获胜，不可能
-        if (xWin && oWin)
-            return false;
-
-
-        // X获胜时，X必须多一步
-        if (xWin) {
-            return x == o + 1;
-        }
-
-
-        // O获胜时，数量必须相等
-        if (oWin) {
-            return x == o;
-        }
-
-
+// 回溯函数
+bool dfs(vector<int>& nums, vector<bool>& used, int k, int start, int sum, int target)
+{
+    // 已经找到 k-1 个满足条件的子集
+    // 剩下的数字一定组成最后一个子集
+    if (k == 1)
         return true;
+
+
+    // 当前子集和满足要求，开始寻找下一个子集
+    if (sum == target)
+    {
+        return dfs(nums, used, k - 1, 0, 0, target);
     }
-};
+
+
+    for (int i = start; i < nums.size(); i++)
+    {
+        if (used[i])
+            continue;
+
+
+        // 当前数字加入后超过目标
+        if (sum + nums[i] > target)
+            continue;
+
+
+        used[i] = true;
+
+
+        if (dfs(nums, used, k, i + 1, sum + nums[i], target))
+            return true;
+
+
+        // 回溯
+        used[i] = false;
+
+
+        // 如果当前桶为空，放当前数字失败，
+        // 后面更小的数字也不需要尝试
+        if (sum == 0)
+            break;
+
+
+        // 跳过重复数字
+        while (i + 1 < nums.size() && nums[i] == nums[i + 1])
+            i++;
+    }
+
+
+    return false;
+}
+
+
+
+// 判断是否可以划分为 k 个和相等的子集
+bool canPartitionKSubsets(vector<int>& nums, int k)
+{
+    int total = 0;
+
+    for (int x : nums)
+        total += x;
+
+
+    // 总和不能被 k 整除
+    if (total % k != 0)
+        return false;
+
+
+    int target = total / k;
+
+
+    // 从大到小排序，提高剪枝效率
+    sort(nums.begin(), nums.end(), greater<int>());
+
+
+    // 最大元素超过目标，不可能
+    if (nums[0] > target)
+        return false;
+
+
+    vector<bool> used(nums.size(), false);
+
+
+    return dfs(nums, used, k, 0, 0, target);
+}
+
 
 
 int main()
 {
-    vector<string> board;
+    int n;
+    cin >> n;
 
-    string aRow;
 
-    for(int i=0; i<3; i++)
-    {
-        getline(cin,aRow);
-        board.push_back(aRow);
-    }
+    vector<int> nums(n);
 
-    bool res=Solution().validTicTacToe(board);
+    for (int i = 0; i < n; i++)
+        cin >> nums[i];
 
-    cout<<(res?"true":"false")<<endl;
+
+    int k;
+    cin >> k;
+
+
+    if (canPartitionKSubsets(nums, k))
+        cout << "true";
+    else
+        cout << "false";
+
 
     return 0;
 }
